@@ -56,7 +56,7 @@ pnpm verify
 ## Release process (maintainers)
 
 1. Merge all pull requests with their changeset files.
-2. Run `pnpm version` to consume changesets, bump `package.json`, and generate `CHANGELOG.md`.
+2. Run `pnpm bump` to consume changesets, bump `package.json`, and generate `CHANGELOG.md`.
 3. Verify the build and publish output look correct with a dry run:
    ```bash
    pnpm release:dry

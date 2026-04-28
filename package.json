@@ -1,6 +1,6 @@
 {
   "name": "@vipul0092/next-absolute-url",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Get the absolute URL of a Next.js request. Works with both Pages Router and App Router.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -28,7 +28,7 @@
     "prepublishOnly": "pnpm build",
     "verify": "pnpm test && pnpm lint",
     "changeset": "changeset",
-    "version": "changeset version",
+    "bump": "changeset version",
     "release": "pnpm build && changeset publish",
     "release:dry": "pnpm build && pnpm pack --dry-run"
   },
@@ -40,7 +40,7 @@
     "app-router",
     "pages-router"
   ],
-  "author": "Vipul Gaur",
+  "author": "Vipul Gaur <sunny3091@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
@@ -49,7 +49,6 @@
     "@tsconfig/strictest": "^2.0.8",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.15.3",
-    "dotenv-cli": "^11.0.0",
     "eslint": "^9.0.0",
     "jest": "^30.0.0",
     "jiti": "^2.6.1",
