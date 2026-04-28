@@ -1,0 +1,266 @@
+import type { IncomingMessage } from "http";
+import absoluteUrl from "./index";
+
+// Based on https://github.com/jakeburden/next-absolute-url/blob/master/index.test.ts
+
+describe("nextAbsoluteUrl", () => {
+  describe("without a defined window", () => {
+    test("no values", () => {
+      const { protocol, host, origin } = absoluteUrl();
+      expect(origin).toBe("http://localhost:3000");
+      expect(protocol).toBe("http:");
+      expect(host).toBe("localhost:3000");
+    });
+    test("both arguments are passed in", async () => {
+      const req = {
+        headers: {
+          host: "localhost:10000",
+        },
+      } as IncomingMessage;
+      const { protocol, host, origin } = absoluteUrl(req, "localhost:8000");
+      expect(origin).toBe("http://localhost:10000");
+      expect(protocol).toBe("http:");
+      expect(host).toBe("localhost:10000");
+    });
+    test("only localhostAddress passed in", () => {
+      const { protocol, host, origin } = absoluteUrl(
+        undefined,
+        "localhost:9000",
+      );
+      expect(origin).toBe("http://localhost:9000");
+      expect(protocol).toBe("http:");
+      expect(host).toBe("localhost:9000");
+    });
+  });
+
+  describe("with a defined window", () => {
+    beforeAll(async () => {
+      // absoluteUrl is intended to run under jsdom, but our jest
+      // version doesn't support per-file environments. Fake it by
+      // defining a global 'window'
+      if (!globalThis.window) {
+        globalThis.window = {
+          location: {} as Location,
+        } as Window & typeof globalThis;
+      }
+    });
+    describe("host is corrupted (is empty somehow)", () => {
+      test("no values", () => {
+        const { protocol, host, origin } = absoluteUrl();
+        expect(origin).toBe("http://localhost:3000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:3000");
+      });
+
+      test("only req passed in", () => {
+        const req = {
+          headers: {
+            host: "localhost:8000",
+          },
+        } as IncomingMessage;
+        const { protocol, host, origin } = absoluteUrl(req);
+        expect(origin).toBe("http://localhost:8000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:8000");
+      });
+
+      test("only localhostAddress passed in", () => {
+        const { protocol, host, origin } = absoluteUrl(
+          undefined,
+          "localhost:9000",
+        );
+        expect(origin).toBe("http://localhost:9000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:9000");
+      });
+
+      test("only from local network passed in", () => {
+        window.location.host = "192.168.88.156:4000";
+        const { protocol, host, origin } = absoluteUrl(
+          undefined,
+          "localhost:6000",
+        );
+        expect(origin).toBe("http://192.168.88.156:4000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("192.168.88.156:4000");
+      });
+
+      test("only from 127.0.0.1 passed in", () => {
+        window.location.host = "127.0.0.1:4000";
+        const { protocol, host, origin } = absoluteUrl(
+          undefined,
+          "localhost:6000",
+        );
+        expect(origin).toBe("http://127.0.0.1:4000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("127.0.0.1:4000");
+      });
+
+      test("both arguments are passed in", () => {
+        const req = {
+          headers: {
+            host: "localhost:10000",
+          },
+        } as IncomingMessage;
+        const { protocol, host, origin } = absoluteUrl(req, "localhost:8000");
+        expect(origin).toBe("http://localhost:10000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:10000");
+      });
+    });
+
+    describe("host is remote", () => {
+      beforeAll(() => {
+        window.location.host = "example.com";
+      });
+
+      test("no values", () => {
+        const { protocol, host, origin } = absoluteUrl();
+        expect(origin).toBe("https://example.com");
+        expect(protocol).toBe("https:");
+        expect(host).toBe("example.com");
+      });
+
+      test("only req passed in", () => {
+        const req = {
+          headers: {
+            host: "example.com",
+          },
+        } as IncomingMessage;
+        const { protocol, host, origin } = absoluteUrl(req);
+        expect(origin).toBe("https://example.com");
+        expect(protocol).toBe("https:");
+        expect(host).toBe("example.com");
+      });
+
+      test("only localhostAddress passed in", () => {
+        const { protocol, host, origin } = absoluteUrl(
+          undefined,
+          "localhost:4000",
+        );
+        expect(origin).toBe("https://example.com");
+        expect(protocol).toBe("https:");
+        expect(host).toBe("example.com");
+      });
+
+      test("both arguments are passed in", () => {
+        const req = {
+          headers: {
+            host: "example.com",
+          },
+        } as IncomingMessage;
+        const { protocol, host, origin } = absoluteUrl(req, "localhost:4000");
+        expect(origin).toBe("https://example.com");
+        expect(protocol).toBe("https:");
+        expect(host).toBe("example.com");
+      });
+    });
+
+    describe("host is localhost", () => {
+      beforeAll(() => {
+        window.location.host = "localhost:4000";
+      });
+
+      test("no values", () => {
+        const { protocol, host, origin } = absoluteUrl();
+        expect(origin).toBe("http://localhost:4000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:4000");
+      });
+
+      test("only req passed in", () => {
+        const req = {
+          headers: {
+            host: "localhost:5000",
+          },
+        } as IncomingMessage;
+        const { protocol, host, origin } = absoluteUrl(req);
+        expect(origin).toBe("http://localhost:5000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:5000");
+      });
+
+      test("only localhostAddress passed in", () => {
+        window.location.host = "localhost:4000";
+        const { protocol, host, origin } = absoluteUrl(
+          undefined,
+          "localhost:6000",
+        );
+        expect(origin).toBe("http://localhost:4000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:4000");
+      });
+
+      test("both arguments are passed in", () => {
+        const req = {
+          headers: {
+            host: "localhost:7000",
+          },
+        } as IncomingMessage;
+        const { protocol, host, origin } = absoluteUrl(req, "localhost:8000");
+        expect(origin).toBe("http://localhost:7000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:7000");
+      });
+    });
+
+    describe("behind a proxy", () => {
+      test("should use the x-forwarded headers", () => {
+        const req = {
+          headers: {
+            host: "localhost:41560",
+            "x-forwarded-host": "localhost:5000",
+            "x-forwarded-proto": "http",
+            "x-forwarded-port": "5000",
+            "x-forwarded-for": "::ffff:127.0.0.1",
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any;
+
+        const { protocol, host, origin } = absoluteUrl(req);
+
+        expect(origin).toBe("http://localhost:5000");
+        expect(protocol).toBe("http:");
+        expect(host).toBe("localhost:5000");
+      });
+
+      test("should use the first value of x-forwarded-proto", () => {
+        const req = {
+          headers: {
+            host: "localhost:41560",
+            "x-forwarded-host": "localhost:5000",
+            "x-forwarded-proto": "https, http",
+            "x-forwarded-port": "5000",
+            "x-forwarded-for": "::ffff:127.0.0.1",
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any;
+
+        const { protocol, host, origin } = absoluteUrl(req);
+
+        expect(origin).toBe("https://localhost:5000");
+        expect(protocol).toBe("https:");
+        expect(host).toBe("localhost:5000");
+      });
+
+      test("should use the first value of x-forwarded-host", () => {
+        const req = {
+          headers: {
+            host: "localhost:41560",
+            "x-forwarded-host": "localhost:5000,fun-url.com",
+            "x-forwarded-proto": "https",
+            "x-forwarded-port": "5000",
+            "x-forwarded-for": "::ffff:127.0.0.1",
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any;
+
+        const { protocol, host, origin } = absoluteUrl(req);
+
+        expect(origin).toBe("https://localhost:5000");
+        expect(protocol).toBe("https:");
+        expect(host).toBe("localhost:5000");
+      });
+    });
+  });
+});
