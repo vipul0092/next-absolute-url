@@ -1,0 +1,1 @@
+# @vipul0092/next-absolute-url
