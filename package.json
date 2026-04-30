@@ -1,6 +1,6 @@
 {
   "name": "@vipul0092/next-absolute-url",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Get the absolute URL of a Next.js request. Works with both Pages Router and App Router.",
   "repository": {
     "type": "git",
@@ -10,9 +10,6 @@
   "bugs": {
     "url": "https://github.com/vipul0092/next-absolute-url/issues"
   },
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/cjs/index.d.ts",
   "exports": {
     ".": {
       "import": {
@@ -25,12 +22,19 @@
       }
     }
   },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/cjs/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "pnpm clean && tsc -p tsconfig.build.json && tsc -p tsconfig.build.esm.json",
+    "build": "pnpm clean && tsc -p tsconfig.build.json && tsc -p tsconfig.build.esm.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
     "test": "jest",
     "lint": "eslint .",
     "prepublishOnly": "pnpm build",

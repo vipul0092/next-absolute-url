@@ -61,7 +61,10 @@ pnpm verify
    ```bash
    pnpm release:dry
    ```
+4. Commit the changes
+5. `npm adduser`
 4. Publish to npm:
    ```bash
-   pnpm release
+   NPM_TOKEN={token} pnpm release
    ```
+5. `git push origin master --tags`
